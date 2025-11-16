@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MarcadorScreen(
-                        onTeam1Score = { sendScoreToDevice("0") },
+                        onTeam1Score = { sendScoreToDevice("1") },
                         onTeam2Score = { sendScoreToDevice("1") }
                     )
                 }
