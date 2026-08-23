@@ -7,11 +7,12 @@ Un proyecto completo para gestionar partidos de pádel, que combina una aplicaci
 La aplicación móvil está construida nativamente para Android utilizando **Kotlin** y **Jetpack Compose**. Ha evolucionado de ser un simple "mando a distancia" a una completa herramienta de gestión deportiva.
 
 ### Características Principales
-* **NUEVO (Rama Smartwatch):** Soporte oficial para relojes inteligentes con **Wear OS**. Convierte tu smartwatch en el mando a distancia perfecto con los controles de puntuación y sincronización en tiempo real.
-* **NUEVO (Rama Smartwatch):** Sistema de historial integrado para poder **Deshacer (Undo)** puntos erróneos al instante, tanto desde el reloj como desde la app móvil.
-* **Modo Partido Completo:** Registro de partidos para 2 o 4 jugadores, con asignación de posiciones en pista.
+* **NUEVO (Rama Smartwatch):** Soporte oficial para relojes inteligentes con **Wear OS**. Convierte tu smartwatch en el mando a distancia perfecto con controles de puntuación, soporte para deshacer (Undo) y sincronización con el marcador.
+* **NUEVO (Rama Smartwatch):** Captura de **Estadísticas Avanzadas (Progressive Disclosure)** en el reloj. Al marcar un punto desde el smartwatch, dispondrás de una ventana efímera de 4 segundos para especificar si fue un *Winner* o un *Fallo*, sin detener el ritmo del partido.
+* **NUEVO (Rama Smartwatch):** Motor de **MVP y Estadísticas Post-Partido**. Al finalizar el partido, la app procesa matemáticamente los eventos (winners vs errores) y calcula automáticamente el MVP (Jugador Más Valioso), mostrándolo en una tarjeta visual junto al ranking de jugadores.
+* **Modo Partido Completo:** Registro de partidos para 2 o 4 jugadores, con asignación de nombres y posiciones en pista.
 * **Lógica Avanzada:** Motor de puntuación que calcula automáticamente los puntos (15, 30, 40, Ventaja), deuces, juegos, sets y tie-breaks.
-* **Seguimiento de Estadísticas:** Permite al usuario tocar a un jugador específico en pantalla para registrar:
+* **Seguimiento de Estadísticas (Móvil):** Interfaz táctil intuitiva que permite registrar:
   * Golpes ganadores (*Winners*).
   * Errores no forzados (*Rally Errors*).
   * Faltas de saque y dobles faltas.
