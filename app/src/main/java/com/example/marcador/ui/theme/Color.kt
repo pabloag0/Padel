@@ -2,10 +2,14 @@ package com.example.marcador.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val CourtGreen = Color(0xFF1F4505)
+val CourtGreenDark = Color(0xFF173404)
+val ElectricMint = Color(0xFFDDF5D0)
+val DeepTeal = Color(0xFF323CA8)
+val NightGreen = Color(0xFF323CA8)
+val AquaAccent = Color(0xFFE8F4FF)
+val LimeGlow = Color(0xFFCFEF6A)
+val SoftIce = Color(0xFFF6F8FF)
+val SurfaceGreen = Color(0xFF27308F)
+val SurfaceGreenLight = Color(0xFF3A45BA)
+val DangerCoral = Color(0xFFFF7D7D)
