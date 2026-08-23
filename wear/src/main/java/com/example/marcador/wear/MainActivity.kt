@@ -33,6 +33,13 @@ class MainActivity : ComponentActivity(), MessageClient.OnMessageReceivedListene
     private var scoreB by mutableStateOf("00")
     private var teamALabel by mutableStateOf("Eq 1")
     private var teamBLabel by mutableStateOf("Eq 2")
+    private var playerTL by mutableStateOf("Jugador 1")
+    private var playerTR by mutableStateOf("Jugador 2")
+    private var playerBL by mutableStateOf("Jugador 3")
+    private var playerBR by mutableStateOf("Jugador 4")
+
+    // Ephemeral State
+    private var detailPromptTeam by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,21 +50,48 @@ class MainActivity : ComponentActivity(), MessageClient.OnMessageReceivedListene
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFF0F172A)), // NightGreen equivalent
+                        .background(Color(0xFF0F172A)),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isMatchStarted) {
-                        MatchControls(
-                            scoreA = scoreA,
-                            scoreB = scoreB,
-                            teamALabel = teamALabel,
-                            teamBLabel = teamBLabel,
-                            onPointA = { sendMessage("/marcador/point/a") },
-                            onPointB = { sendMessage("/marcador/point/b") },
-                            onUndo = { sendMessage("/marcador/undo") }
-                        )
+                        if (detailPromptTeam != null) {
+                            DetailPromptScreen(
+                                team = detailPromptTeam!!,
+                                playerTL = playerTL,
+                                playerTR = playerTR,
+                                playerBL = playerBL,
+                                playerBR = playerBR,
+                                onEnrich = { type, actor ->
+                                    sendMessage("/marcador/enrich?type=$type&actor=$actor")
+                                    detailPromptTeam = null
+                                }
+                            )
+                        } else {
+                            MatchControls(
+                                scoreA = scoreA,
+                                scoreB = scoreB,
+                                teamALabel = teamALabel,
+                                teamBLabel = teamBLabel,
+                                onPointA = { 
+                                    sendMessage("/marcador/point/a")
+                                    detailPromptTeam = "A"
+                                },
+                                onPointB = { 
+                                    sendMessage("/marcador/point/b")
+                                    detailPromptTeam = "B"
+                                },
+                                onUndo = { sendMessage("/marcador/undo") }
+                            )
+                        }
                     } else {
                         WaitingScreen()
+                    }
+                }
+                
+                LaunchedEffect(detailPromptTeam) {
+                    if (detailPromptTeam != null) {
+                        kotlinx.coroutines.delay(4000)
+                        detailPromptTeam = null
                     }
                 }
             }
@@ -88,6 +122,10 @@ class MainActivity : ComponentActivity(), MessageClient.OnMessageReceivedListene
                     scoreB = json.getString("scoreB")
                     teamALabel = json.getString("teamA")
                     teamBLabel = json.getString("teamB")
+                    if (json.has("playerTL")) playerTL = json.getString("playerTL")
+                    if (json.has("playerTR")) playerTR = json.getString("playerTR")
+                    if (json.has("playerBL")) playerBL = json.getString("playerBL")
+                    if (json.has("playerBR")) playerBR = json.getString("playerBR")
                 }
             } catch (e: Exception) {
                 Log.e("Wear", "Error parsing state", e)
@@ -187,6 +225,72 @@ fun MatchControls(
             modifier = Modifier.height(32.dp).width(80.dp)
         ) {
             Text("Deshacer", fontSize = 10.sp)
+        }
+    }
+}
+
+@Composable
+fun DetailPromptScreen(
+    team: String,
+    playerTL: String,
+    playerTR: String,
+    playerBL: String,
+    playerBR: String,
+    onEnrich: (String, String) -> Unit
+) {
+    // If team == A, players are Top (TL, TR). If B, Bottom (BL, BR)
+    // Wait, in our domain: 
+    // TOP_LEFT / TOP_RIGHT = Team A
+    // BOTTOM_LEFT / BOTTOM_RIGHT = Team B
+    
+    val (myDrivePos, myRevesPos, myDriveName, myRevesName) = if (team == "A") {
+        listOf("TOP_RIGHT", "TOP_LEFT", playerTR, playerTL)
+    } else {
+        listOf("BOTTOM_RIGHT", "BOTTOM_LEFT", playerBR, playerBL)
+    }
+    
+    val (oppDrivePos, oppRevesPos, oppDriveName, oppRevesName) = if (team == "A") {
+        listOf("BOTTOM_RIGHT", "BOTTOM_LEFT", playerBR, playerBL)
+    } else {
+        listOf("TOP_RIGHT", "TOP_LEFT", playerTR, playerTL)
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("¿Cómo ha sido?", color = Color.White, fontSize = 12.sp)
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // Winners
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Button(
+                onClick = { onEnrich("WINNER", myRevesPos) },
+                modifier = Modifier.weight(1f).height(40.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF10B981))
+            ) { Text("W: ${myRevesName.take(5)}", fontSize = 9.sp) }
+            Button(
+                onClick = { onEnrich("WINNER", myDrivePos) },
+                modifier = Modifier.weight(1f).height(40.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF10B981))
+            ) { Text("W: ${myDriveName.take(5)}", fontSize = 9.sp) }
+        }
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // Errors (Rivals)
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Button(
+                onClick = { onEnrich("RALLY_ERROR", oppRevesPos) },
+                modifier = Modifier.weight(1f).height(40.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEF4444)) // Red
+            ) { Text("F: ${oppRevesName.take(5)}", fontSize = 9.sp) }
+            Button(
+                onClick = { onEnrich("RALLY_ERROR", oppDrivePos) },
+                modifier = Modifier.weight(1f).height(40.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFEF4444)) // Red
+            ) { Text("F: ${oppDriveName.take(5)}", fontSize = 9.sp) }
         }
     }
 }

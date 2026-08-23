@@ -14,7 +14,8 @@ enum class PointEventType {
     RALLY_ERROR,
     WINNER,
     SERVE_FAULT,
-    DOUBLE_FAULT
+    DOUBLE_FAULT,
+    GENERIC
 }
 
 data class SetScore(
@@ -24,7 +25,7 @@ data class SetScore(
 
 data class MatchEvent(
     val type: PointEventType,
-    val actor: CourtPosition,
+    val actor: CourtPosition? = null,
     val target: CourtPosition? = null,
     val pointWinner: TeamSide? = null,
     val server: CourtPosition? = null
@@ -69,21 +70,39 @@ private fun pointLabel(pointState: Int): String = when (pointState) {
 }
 
 fun ScoreboardState.pointToTeamA(): ScoreboardState {
-    if (pointStateA == 4) return winGameForA()
-    if (pointStateB == 4) return copy(pointStateA = 3, pointStateB = 3, firstServeFault = false)
-    if (pointStateA == 3 && pointStateB == 3) return copy(pointStateA = 4, firstServeFault = false)
-    if (pointStateA < 3) return copy(pointStateA = pointStateA + 1, firstServeFault = false)
-    if (pointStateA == 3 && pointStateB < 3) return winGameForA()
-    return this
+    val newState = if (pointStateA == 4) winGameForA()
+    else if (pointStateB == 4) copy(pointStateA = 3, pointStateB = 3, firstServeFault = false)
+    else if (pointStateA == 3 && pointStateB == 3) copy(pointStateA = 4, firstServeFault = false)
+    else if (pointStateA < 3) copy(pointStateA = pointStateA + 1, firstServeFault = false)
+    else if (pointStateA == 3 && pointStateB < 3) winGameForA()
+    else this
+
+    return if (newState === this) this else newState.copy(
+        events = events + MatchEvent(
+            type = PointEventType.GENERIC,
+            actor = null,
+            pointWinner = TeamSide.A,
+            server = currentServer
+        )
+    )
 }
 
 fun ScoreboardState.pointToTeamB(): ScoreboardState {
-    if (pointStateB == 4) return winGameForB()
-    if (pointStateA == 4) return copy(pointStateA = 3, pointStateB = 3, firstServeFault = false)
-    if (pointStateA == 3 && pointStateB == 3) return copy(pointStateB = 4, firstServeFault = false)
-    if (pointStateB < 3) return copy(pointStateB = pointStateB + 1, firstServeFault = false)
-    if (pointStateB == 3 && pointStateA < 3) return winGameForB()
-    return this
+    val newState = if (pointStateB == 4) winGameForB()
+    else if (pointStateA == 4) copy(pointStateA = 3, pointStateB = 3, firstServeFault = false)
+    else if (pointStateA == 3 && pointStateB == 3) copy(pointStateB = 4, firstServeFault = false)
+    else if (pointStateB < 3) copy(pointStateB = pointStateB + 1, firstServeFault = false)
+    else if (pointStateB == 3 && pointStateA < 3) winGameForB()
+    else this
+
+    return if (newState === this) this else newState.copy(
+        events = events + MatchEvent(
+            type = PointEventType.GENERIC,
+            actor = null,
+            pointWinner = TeamSide.B,
+            server = currentServer
+        )
+    )
 }
 
 fun ScoreboardState.recordWinner(winner: CourtPosition): ScoreboardState {

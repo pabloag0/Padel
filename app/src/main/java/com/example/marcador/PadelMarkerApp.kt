@@ -82,7 +82,39 @@ fun PadelMarkerApp(
                 scoreboard = updatedScoreboard
                 if (updatedScoreboard.isMatchFinished()) { /* Handle finish later if needed */ }
             },
-            onUndo = { undoLastAction() }
+            onUndo = { undoLastAction() },
+            onEnrichPoint = { typeStr, posStr ->
+                // Type: WINNER, RALLY_ERROR
+                // Pos: TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
+                val type = try { PointEventType.valueOf(typeStr) } catch (e: Exception) { null }
+                val pos = try { CourtPosition.valueOf(posStr) } catch (e: Exception) { null }
+                
+                if (type != null && pos != null) {
+                    val events = scoreboard.events.toMutableList()
+                    if (events.isNotEmpty()) {
+                        val lastEvent = events.last()
+                        val enrichedEvent = if (type == PointEventType.RALLY_ERROR) {
+                            MatchEvent(
+                                type = type,
+                                actor = null,
+                                target = pos,
+                                pointWinner = lastEvent.pointWinner,
+                                server = lastEvent.server
+                            )
+                        } else {
+                            MatchEvent(
+                                type = type,
+                                actor = pos,
+                                target = null,
+                                pointWinner = lastEvent.pointWinner,
+                                server = lastEvent.server
+                            )
+                        }
+                        events[events.lastIndex] = enrichedEvent
+                        scoreboard = scoreboard.copy(events = events.toList())
+                    }
+                }
+            }
         )
     }
 
@@ -101,7 +133,11 @@ fun PadelMarkerApp(
             scoreA = scoreboard.pointLabelA(),
             scoreB = scoreboard.pointLabelB(),
             teamA = localSetup.teamALabel(),
-            teamB = localSetup.teamBLabel()
+            teamB = localSetup.teamBLabel(),
+            playerTL = localSetup.topLeft.ifBlank { "Jugador 1" },
+            playerTR = localSetup.topRight.ifBlank { "Jugador 2" },
+            playerBL = localSetup.bottomLeft.ifBlank { "Jugador 3" },
+            playerBR = localSetup.bottomRight.ifBlank { "Jugador 4" }
         )
         if (connectionState.value == BluetoothState.CONNECTED && localMatchStarted) {
             onSendScore(scoreboard.bluetoothStateMessage())
