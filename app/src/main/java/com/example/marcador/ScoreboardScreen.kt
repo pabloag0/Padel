@@ -37,6 +37,7 @@ fun MarcadorScreen(
     onPlayerWinner: (CourtPosition) -> Unit,
     onRallyError: (CourtPosition, CourtPosition) -> Unit,
     onServeFault: (CourtPosition) -> Unit,
+    onUndo: () -> Unit,
     onReset: () -> Unit,
     onChangeMode: () -> Unit,
     onFinishLocalMatch: () -> Unit,
@@ -102,6 +103,10 @@ fun MarcadorScreen(
                             selectedHitter = null
                             onServeFault(position)
                         },
+                        onUndo = {
+                            selectedHitter = null
+                            onUndo()
+                        },
                         onReset = {
                             selectedHitter = null
                             onReset()
@@ -114,6 +119,7 @@ fun MarcadorScreen(
                         appMode = appMode,
                         onTeam1Score = onTeam1Score,
                         onTeam2Score = onTeam2Score,
+                        onUndo = onUndo,
                         onReset = onReset,
                         onFinishLocalMatch = onFinishLocalMatch,
                         scoringEnabled = scoringEnabled
@@ -138,6 +144,7 @@ fun ScorePreview() {
             onPlayerWinner = {},
             onRallyError = { _, _ -> },
             onServeFault = {},
+            onUndo = {},
             onReset = {},
             onChangeMode = {},
             onFinishLocalMatch = {},

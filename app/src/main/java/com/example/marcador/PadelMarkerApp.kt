@@ -55,6 +55,57 @@ fun PadelMarkerApp(
     var savedMatches by remember { mutableStateOf(historyRepository.loadMatches()) }
     var continuedMatchMillis by remember { mutableStateOf<Long?>(null) }
     var showIntro by remember { mutableStateOf(true) }
+    
+    // Undo stack
+    var historyStack by remember { mutableStateOf(listOf<ScoreboardState>()) }
+
+    fun undoLastAction() {
+        if (historyStack.isNotEmpty()) {
+            val previousState = historyStack.last()
+            historyStack = historyStack.dropLast(1)
+            scoreboard = previousState
+        }
+    }
+
+    val wearableManager = remember {
+        WearableManager(
+            context = context,
+            onPointA = { 
+                val updatedScoreboard = scoreboard.pointToTeamA()
+                historyStack = historyStack + scoreboard
+                scoreboard = updatedScoreboard
+                if (connectionState.value == BluetoothState.CONNECTED) onSendScore(TeamSide.A.bluetoothScoreMessage())
+                if (updatedScoreboard.isMatchFinished()) { /* Handle finish later if needed */ }
+            },
+            onPointB = { 
+                val updatedScoreboard = scoreboard.pointToTeamB()
+                historyStack = historyStack + scoreboard
+                scoreboard = updatedScoreboard
+                if (connectionState.value == BluetoothState.CONNECTED) onSendScore(TeamSide.B.bluetoothScoreMessage())
+                if (updatedScoreboard.isMatchFinished()) { /* Handle finish later if needed */ }
+            },
+            onUndo = { undoLastAction() }
+        )
+    }
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        wearableManager.initialize()
+    }
+    
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose { wearableManager.cleanup() }
+    }
+
+    // Sync state with Wearable whenever it changes
+    androidx.compose.runtime.LaunchedEffect(scoreboard, localMatchStarted) {
+        wearableManager.updateMatchState(
+            started = localMatchStarted,
+            scoreA = scoreboard.pointLabelA(),
+            scoreB = scoreboard.pointLabelB(),
+            teamA = localSetup.teamALabel(),
+            teamB = localSetup.teamBLabel()
+        )
+    }
 
     fun finishAndStoreLocalMatch(finalScoreboard: ScoreboardState) {
         historyRepository.saveMatch(
@@ -65,6 +116,7 @@ fun PadelMarkerApp(
         savedMatches = historyRepository.loadMatches()
         continuedMatchMillis = null
         scoreboard = ScoreboardState()
+        historyStack = emptyList()
         localSetup = MatchSetup()
         localMatchStarted = false
         appMode = null
@@ -72,6 +124,7 @@ fun PadelMarkerApp(
     }
 
     fun applyScoringUpdate(updatedScoreboard: ScoreboardState, scoringTeam: TeamSide?) {
+        historyStack = historyStack + scoreboard
         scoreboard = updatedScoreboard
         if (connectionState.value == BluetoothState.CONNECTED && scoringTeam != null) {
             onSendScore(scoringTeam.bluetoothScoreMessage())

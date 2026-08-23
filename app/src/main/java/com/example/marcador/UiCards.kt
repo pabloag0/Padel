@@ -250,6 +250,7 @@ fun ActionButtons(
     appMode: AppMode,
     onTeam1Score: () -> Unit,
     onTeam2Score: () -> Unit,
+    onUndo: () -> Unit,
     onReset: () -> Unit,
     onFinishLocalMatch: () -> Unit,
     scoringEnabled: Boolean
@@ -259,10 +260,19 @@ fun ActionButtons(
             ScoreActionButton("Punto Equipo 1", "Suma al equipo superior", CourtGreen, scoringEnabled, Modifier.weight(1f), onTeam1Score)
             ScoreActionButton("Punto Equipo 2", "Suma al equipo inferior", AquaAccent, scoringEnabled, Modifier.weight(1f), onTeam2Score)
         }
-        OutlinedButton(
-            onClick = onReset,
-            modifier = Modifier.fillMaxWidth(),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(
+                onClick = onUndo,
+                modifier = Modifier.weight(1f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+            ) {
+                Text("Deshacer", style = MaterialTheme.typography.labelLarge)
+            }
+            OutlinedButton(
+                onClick = onReset,
+                modifier = Modifier.weight(1f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = SoftIce)
         ) { Text("Reiniciar partido") }
         Button(
@@ -295,6 +305,7 @@ fun PlayerEventGrid(
     onPlayerTap: (CourtPosition) -> Unit,
     onWinner: (CourtPosition) -> Unit,
     onServeFault: (CourtPosition) -> Unit,
+    onUndo: () -> Unit,
     onReset: () -> Unit,
     onFinishLocalMatch: () -> Unit,
     appMode: AppMode
@@ -395,12 +406,20 @@ fun PlayerEventGrid(
                     )
                 }
             }
-            OutlinedButton(
-                onClick = onReset,
-                modifier = Modifier.fillMaxWidth(),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = SoftIce)
-            ) { Text("Reiniciar partido") }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(
+                    onClick = onUndo,
+                    modifier = Modifier.weight(1f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                ) { Text("Deshacer", style = MaterialTheme.typography.labelLarge) }
+                OutlinedButton(
+                    onClick = onReset,
+                    modifier = Modifier.weight(1f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = SoftIce)
+                ) { Text("Reiniciar") }
+            }
             Button(
                 onClick = onFinishLocalMatch,
                 modifier = Modifier.fillMaxWidth(),

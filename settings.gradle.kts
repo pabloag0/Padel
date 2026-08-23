@@ -20,4 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Marcador"
-include(":app")
+include(":app", ":wear")
