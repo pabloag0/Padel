@@ -380,18 +380,34 @@ void loop() {
   if (SerialBT.available()) {
     String s = SerialBT.readStringUntil('\n'); // lee toda la línea
     s.trim();
-    for (size_t i = 0; i < s.length(); ++i) {
-      char c = s.charAt(i);
-      if (c == '0') {
-        pointToA();
-      } else if (c == '1') {
-        pointToB();
-      } else if (c == 'A' || c == 'a') {
-        pointToA();
-      } else if (c == 'B' || c == 'b') {
-        pointToB();
-      } else {
-        // Ignorar otros caracteres
+    if (s.startsWith("SET:")) {
+      // Formato: SET:pA,pB,gA,gB,sA,sB
+      int firstComma = s.indexOf(',');
+      int secondComma = s.indexOf(',', firstComma + 1);
+      int thirdComma = s.indexOf(',', secondComma + 1);
+      int fourthComma = s.indexOf(',', thirdComma + 1);
+      int fifthComma = s.indexOf(',', fourthComma + 1);
+
+      if (firstComma != -1 && fifthComma != -1) {
+        pointStateA = s.substring(4, firstComma).toInt();
+        pointStateB = s.substring(firstComma + 1, secondComma).toInt();
+        gamesA = s.substring(secondComma + 1, thirdComma).toInt();
+        gamesB = s.substring(thirdComma + 1, fourthComma).toInt();
+        setsA = s.substring(fourthComma + 1, fifthComma).toInt();
+        setsB = s.substring(fifthComma + 1).toInt();
+      }
+    } else {
+      for (size_t i = 0; i < s.length(); ++i) {
+        char c = s.charAt(i);
+        if (c == '0') {
+          pointToA();
+        } else if (c == '1') {
+          pointToB();
+        } else if (c == 'A' || c == 'a') {
+          pointToA();
+        } else if (c == 'B' || c == 'b') {
+          pointToB();
+        }
       }
     }
     // Actualizar pantallas/matrices luego de procesar la entrada

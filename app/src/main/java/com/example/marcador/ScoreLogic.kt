@@ -58,6 +58,7 @@ fun TeamSide.opponent(): TeamSide = if (this == TeamSide.A) TeamSide.B else Team
 
 fun TeamSide.bluetoothScoreMessage(): String = if (this == TeamSide.A) "0\n" else "1\n"
 
+fun ScoreboardState.bluetoothStateMessage(): String = "SET:$pointStateA,$pointStateB,$gamesA,$gamesB,$setsA,$setsB\n"
 private fun pointLabel(pointState: Int): String = when (pointState) {
     0 -> "00"
     1 -> "15"

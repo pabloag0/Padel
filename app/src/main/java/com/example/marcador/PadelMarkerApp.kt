@@ -74,14 +74,12 @@ fun PadelMarkerApp(
                 val updatedScoreboard = scoreboard.pointToTeamA()
                 historyStack = historyStack + scoreboard
                 scoreboard = updatedScoreboard
-                if (connectionState.value == BluetoothState.CONNECTED) onSendScore(TeamSide.A.bluetoothScoreMessage())
                 if (updatedScoreboard.isMatchFinished()) { /* Handle finish later if needed */ }
             },
             onPointB = { 
                 val updatedScoreboard = scoreboard.pointToTeamB()
                 historyStack = historyStack + scoreboard
                 scoreboard = updatedScoreboard
-                if (connectionState.value == BluetoothState.CONNECTED) onSendScore(TeamSide.B.bluetoothScoreMessage())
                 if (updatedScoreboard.isMatchFinished()) { /* Handle finish later if needed */ }
             },
             onUndo = { undoLastAction() }
@@ -96,7 +94,7 @@ fun PadelMarkerApp(
         onDispose { wearableManager.cleanup() }
     }
 
-    // Sync state with Wearable whenever it changes
+    // Sync state with Wearable & Bluetooth whenever it changes
     androidx.compose.runtime.LaunchedEffect(scoreboard, localMatchStarted) {
         wearableManager.updateMatchState(
             started = localMatchStarted,
@@ -105,6 +103,9 @@ fun PadelMarkerApp(
             teamA = localSetup.teamALabel(),
             teamB = localSetup.teamBLabel()
         )
+        if (connectionState.value == BluetoothState.CONNECTED && localMatchStarted) {
+            onSendScore(scoreboard.bluetoothStateMessage())
+        }
     }
 
     fun finishAndStoreLocalMatch(finalScoreboard: ScoreboardState) {
@@ -126,9 +127,6 @@ fun PadelMarkerApp(
     fun applyScoringUpdate(updatedScoreboard: ScoreboardState, scoringTeam: TeamSide?) {
         historyStack = historyStack + scoreboard
         scoreboard = updatedScoreboard
-        if (connectionState.value == BluetoothState.CONNECTED && scoringTeam != null) {
-            onSendScore(scoringTeam.bluetoothScoreMessage())
-        }
         if (updatedScoreboard.isMatchFinished()) {
             finishAndStoreLocalMatch(updatedScoreboard)
         }
