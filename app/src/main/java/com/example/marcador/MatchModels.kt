@@ -348,7 +348,7 @@ private fun JSONObject.optMatchEvents(): List<MatchEvent> {
             val item = array.getJSONObject(index)
             val type = runCatching { PointEventType.valueOf(item.getString("type")) }.getOrNull()
             val actor = item.optCourtPosition("actor")
-            if (type != null && actor != null) {
+            if (type != null) {
                 add(
                     MatchEvent(
                         type = type,
@@ -369,7 +369,7 @@ private fun List<MatchEvent>.toMatchEventsJsonArray(): JSONArray {
         array.put(
             JSONObject().apply {
                 put("type", event.type.name)
-                put("actor", event.actor.name)
+                event.actor?.let { put("actor", it.name) }
                 event.target?.let { put("target", it.name) }
                 event.pointWinner?.let { put("pointWinner", it.name) }
                 event.server?.let { put("server", it.name) }
