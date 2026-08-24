@@ -208,6 +208,9 @@ data class MatchRecord(
                     actorStats?.serveFaults = (actorStats?.serveFaults ?: 0) + 1
                     actorStats?.doubleFaults = (actorStats?.doubleFaults ?: 0) + 1
                 }
+                PointEventType.GENERIC -> {
+                    // Ignorar para estadísticas individuales, ya que no hay un actor concreto
+                }
             }
         }
         return participants.map { participant ->
