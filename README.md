@@ -1,4 +1,4 @@
-# hola javi
+# Marcador Pádel 🎾
 
 Un proyecto completo para gestionar partidos de pádel, que combina una aplicación móvil Android de seguimiento de estadísticas con un marcador físico construido sobre un microcontrolador ESP32.
 
