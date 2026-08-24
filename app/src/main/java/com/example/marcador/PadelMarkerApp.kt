@@ -285,6 +285,7 @@ fun PadelMarkerApp(
                     savedMatches = historyRepository.loadMatches()
                     viewingHistory = true
                 },
+                onUndo = { undoLastAction() },
                 onConnect = onConnect,
                 onDisconnect = onDisconnect
             )
