@@ -275,6 +275,7 @@ fun ActionButtons(
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = SoftIce)
         ) { Text("Reiniciar partido") }
+        }
         Button(
             onClick = onFinishLocalMatch,
             modifier = Modifier.fillMaxWidth(),
@@ -441,7 +442,6 @@ fun PlayerEventGrid(
         }
     }
 }
-
 @Composable
 private fun PlayerEventButton(
     position: CourtPosition,
